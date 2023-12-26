@@ -1,3 +1,9 @@
+// General Constants
+
+const colsPerRow = 4
+
+// Item Constants
+
 const evModifierBig = 28
 
 const evIncreaseBigPrice = 500
@@ -15,7 +21,7 @@ const evModifierSmall = 4
 
 const evIncreaseSmallPrice = 75
 
-const evIncreaseSmall = {
+const evIncreaseSmall = { 
   "hp": "Health Feather",
   "atk": "Muscle Feather",
   "def": "Resist Feather",

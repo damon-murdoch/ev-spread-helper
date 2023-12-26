@@ -14,9 +14,12 @@ function parseShowdownExport() {
 }
 
 // Create Item Table
-function createItemTable(setNo, items, price){
+function createItemTable(set, setNo, items, price) {
 
-  console.log(`Generating table ${setNo} ...`)
+  // Dereference Species
+  const species = set["species"]
+
+  console.log(`Generating table ${setNo} (${species}) ...`)
 
   // Clear instructions div
   const parent = document.getElementById('instructions');
@@ -30,18 +33,19 @@ function createItemTable(setNo, items, price){
 
   // Assign table header contents
   tableHeader.innerHTML = `<tr>
-<th colspan=2>Spread ${setNo}</th>
+<th colspan=${colsPerRow}>
+  Spread ${setNo} 
+  <span class='text-secondary'>(${species})</span>
+</th>
 </tr>
 <tr>
-  <th style="width: 50%">
-    Item
-  </th>
-  <th style="width: 50%">
-    Amount
+  <th colspan=${colsPerRow}>
+    Items Required
+    <span class='text-secondary'>(Total Cost: ¥${price})</span>
   </th>
 </tr>
 `;
-  
+
   // Add table header to table
   newTable.appendChild(tableHeader);
 
@@ -49,26 +53,41 @@ function createItemTable(setNo, items, price){
   const tableBody = document.createElement('tbody');
   tableBody.classList.add("text-left");
 
-  // Loop over all of the items
-  for(const item of Object.keys(items)){
-    // Create the row element for the table body
-    const tableRow = document.createElement('tr');
+  // Iterator
+  let i = 0;
 
-    // Assign table row contents
-    tableRow.innerHTML = `<th>
-  ${item}
-</th>
-<td>
-  ${items[item]}
-</td>`; 
-    // Add the row to the table
-    tableBody.appendChild(tableRow);
+  // Get all of the item names
+  const keys = Object.keys(items);
+
+  // While we have not reached the end of the array
+  while (i < keys.length) {
+    // Create the table row
+    const row = document.createElement('tr');
+    // Create 'colsPerRow' columns per row
+    for (let j = i + colsPerRow; i < j; i++) {
+      // Create the table column
+      const col = document.createElement('td');
+
+      // Index is in range
+      if (i < keys.length) {
+
+        // Get the item name
+        const item = keys[i];
+
+        // Add item, amount to column
+        col.innerHTML = `${item} x${items[item]}`;
+      }
+      else // Index not in range
+      {
+        // Empty column
+        col.innerHTML = `-`;
+      }
+      // Add column to the row
+      row.appendChild(col);
+    }
+    // Add the row to the body
+    tableBody.appendChild(row);
   }
-
-  /*
-  <th> Total Cost </th>
-  <th> ¥${price} </th>
-  */
 
   // ...
 
@@ -218,7 +237,7 @@ function generate() {
       }
 
       // Create the item table, increment set number
-      createItemTable(setNo++, items, price);
+      createItemTable(set, setNo++, items, price);
     }
   }
 } 
