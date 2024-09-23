@@ -4,7 +4,7 @@
 
 <head>
   <!-- Webpage Title -->
-  <title>EBR EV Spread Utility</title>
+  <title>Pokémon EV Spread Helper</title>
 
   <!-- Custom Icon -->
   <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico" />
@@ -49,11 +49,10 @@
     </div>
     <div id="body" class="container bg-dark rounded overflow-auto my-2 pb-3" style="opacity: 0.8; max-height: 90vh">
       <div id="title" class="text-light text-center">
-        <h2>Emerald Battle Revolution EV Spread Utility</h2>
+        <h2>Pokémon EV Spread Helper</h2>
         <div class="container-fluid">
           <p class="h5 text-muted">
-            For use with 
-            the <a class="text-secondary" href="https://www.dragapult.xyz/?ebr">Emerald Battle Revolution Decompilation Project</a>
+            Item-Based Ingame EV Spread Helper
           </p>
           <p class="text-muted lead">
             Developed by
@@ -63,35 +62,64 @@
         <div>
           <!-- Textarea input field -->
           <div class="form-group">
-            <div class="bg-secondary rounded py-1">
-              <p>
-                Paste a Pokemon Showdown! Set Export below, and instructions will be
-                generated for how to recreate this set in-game. This will include evs,
-                ivs and nature. You may input multiple sets at once!
-              </p>
-              <p>
-                Please ensure your ivs are correct (especially where hidden power is 
-                involved), as this tool does not check them for you!
-              </p>
-            </div>
-            <p class="lead">
-              Pokemon Showdown Set Export
-            </p>
-            <textarea class="form-control" id="showdownExport" rows="8" placeholder="e.g. Gardevoir @ Gardevoirite  
+            <table class="table table-dark">
+              <thead class="text-center">
+                <tr>
+                  <th>
+                    <div class="bg-secondary rounded py-1">
+                      <p>
+                        Paste a Pokemon Showdown! Set Export below, and instructions will be
+                        generated for how to recreate this set in-game. This will include evs,
+                        ivs and nature. You may input multiple sets at once!
+                      </p>
+                      <p>
+                        Please ensure your ivs are correct (especially where hidden power is
+                        involved), as this tool does not check them for you!
+                      </p>
+                    </div>
+                  </th>
+                </tr>
+                <tr>
+                  <th>
+                    <select class='form-control' id="game">
+                      <option id="main" value="main" selected>
+                        Main Series Games (Gen 8-9)
+                      </option>
+                      <option id="ebr" value="ebr">
+                        Emerald Battle Revolution
+                      </option>
+                    </select>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <textarea class="form-control" id="showdownExport" rows="8" placeholder="e.g. Gardevoir @ Gardevoirite  
 Ability: Trace  
 EVs: 172 HP / 100 Def / 196 SpA / 12 SpD / 28 Spe  
 Modest Nature  
 - Hyper Voice  
 - Psychic  
 - Trick Room  
-- Protect">
-</textarea>
-          </div>
-          <btn class="form-control btn btn-secondary" onClick="generate()">
-            Generate Instructions
-          </btn>
-          <div id="instructions">
-            
+- Protect"></textarea>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <btn class="form-control btn btn-secondary" onClick="generate()">
+                      Generate Instructions
+                    </btn>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div id="instructions">
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -14,7 +14,7 @@ function parseShowdownExport() {
 }
 
 // Create Item Table
-function createItemTable(set, setNo, items, price) {
+function createItemTable(set, setNo, items) {
 
   // Dereference Species
   const species = set["species"]
@@ -37,12 +37,6 @@ function createItemTable(set, setNo, items, price) {
   Spread ${setNo} 
   <span class='text-secondary'>(${species})</span>
 </th>
-</tr>
-<tr>
-  <th colspan=${colsPerRow}>
-    Items Required
-    <span class='text-secondary'>(Total Cost: ¥${price})</span>
-  </th>
 </tr>
 `;
 
@@ -98,12 +92,100 @@ function createItemTable(set, setNo, items, price) {
   parent.appendChild(newTable);
 }
 
+function get_ev_items(evs, game, items) {
+
+  // Loop over the evs
+  for (const stat in evs) {
+
+    // Get the ev number for the stat
+    const value = evs[stat];
+
+    // Get the remainder after applying 'n' big modifiers
+    const evSmall = value % (evModifierBig[game]);
+
+    // Get the clean number of 'big' modifiers
+    const evBig = value - evSmall;
+
+    // Get the number of modifiers required
+    const evBigAmount = evBig / (evModifierBig[game]);
+    const evSmallAmount = evSmall / (evModifierSmall[game]);
+
+    // Any 'big' items required
+    if (evBigAmount > 0) {
+      // Get the name of the item required
+      const evBigItem = evIncreaseBig[stat];
+
+      // Add the item, quantity to the list
+      items[evBigItem] = evBigAmount;
+    }
+
+    // Any 'small' items required
+    if (evSmallAmount > 0) {
+      // Get the name of the item required
+      const evSmallItem = evIncreaseSmall[stat];
+
+      // Add the item, quantity to the list
+      items[evSmallItem] = evSmallAmount;
+    }
+  }
+
+  return items
+}
+
+function get_iv_items(ivs, items) {
+
+  // Loop over the ivs
+  for (const stat in ivs) {
+    // Get the ev number for the stat
+    const value = ivs[stat];
+
+    // Value less than 31
+    if (value < 31) {
+
+      // If stat is less than 15, and has
+      // an iv-zeroing item associated
+      if (value < 15 && stat in ivMin) {
+
+        // Get the iv-min item required
+        const ivMinItem = ivMin[stat];
+
+        // Add the iv-min item to the list
+        items[ivMinItem] = 1;
+
+        // Non-zero ivs
+        if (value > 0) {
+          // Add the iv increasing item required
+          const ivIncreaseItem = ivIncrease[stat];
+          items[ivIncreaseItem] = value;
+        }
+      }
+      else // Value over 15/stat not in iv min
+      {
+        // Get the number of items required
+        const ivReduce = 31 - value;
+
+        // At least one item required
+        if (ivReduce > 0) {
+          // Get the iv-reducing item required
+          const ivReduceItem = ivDecrease[stat];
+          items[ivReduceItem] = ivReduce;
+        }
+      }
+    }
+  }
+
+  return items
+}
+
 // Instructions Generator
 function generate() {
 
   // Clear instructions div
   const parent = document.getElementById('instructions');
   parent.innerHTML = "";
+
+  // Get the game to generate instructions for
+  const game = document.getElementById('game').value;
 
   // Parse the showdown set export
   const sets = parseShowdownExport();
@@ -117,19 +199,35 @@ function generate() {
     // Set is not null
     if (set !== null) {
 
-      // Total price for the set
-      let price = 2500 + 300; // Bottle Cap + Fresh Start Mochi
-
       // Items Table
       // Format: 
       // key = item name
       // value = quantity
-      const items = {
+      let items = {
         // Required to reset existing evs
-        "Fresh Start Mochi (Optional)": 1,
-        // Required to maximise ivs
-        "Bottle Cap": 1,
+        "Fresh Start Mochi (Optional)": 1
       }
+
+      // Game-Specific
+      switch (game) {
+        // Main Series
+        case 'main': {
+          // Add Bottle Caps
+          items["Bottle Caps / Gold Bottle Cap (Optional)"] = 1;
+        }; break;
+
+        // Emerald Battle Revolution
+        case 'ebr': {
+          // Add Bottle Cap
+          items["Bottle Cap (Optional)"] = 1;
+
+          // Get the iv items for the game, set
+          items = get_iv_items(set.ivs, items);
+        }; break;
+      }
+
+      // Get the ev items for the game, set
+      items = get_ev_items(set.evs, game, items);
 
       // Get the nature from the set
       const nature = set.nature.toLowerCase();
@@ -143,101 +241,8 @@ function generate() {
         items[natureItemName] = 1;
       }
 
-      // Get the EVs from the set
-      const evs = set.evs;
-
-      // Loop over the evs
-      for (const stat in evs) {
-
-        // Get the ev number for the stat
-        const value = evs[stat];
-
-        // Get the remainder after applying 'n' big modifiers
-        const evSmall = value % evModifierBig;
-
-        // Get the clean number of 'big' modifiers
-        const evBig = value - evSmall;
-
-        // Get the number of modifiers required
-        const evBigAmount = evBig / evModifierBig;
-        const evSmallAmount = evSmall / evModifierSmall;
-
-        // Any 'big' items required
-        if (evBigAmount > 0) {
-          // Get the name of the item required
-          const evBigItem = evIncreaseBig[stat];
-
-          // Add the item, quantity to the list
-          items[evBigItem] = evBigAmount;
-
-          // Add item prices to the total
-          price += (evIncreaseBigPrice * evBigAmount);
-        }
-
-        // Any 'small' items required
-        if (evSmallAmount > 0) {
-          // Get the name of the item required
-          const evSmallItem = evIncreaseSmall[stat];
-
-          // Add the item, quantity to the list
-          items[evSmallItem] = evSmallAmount;
-
-          // Add item prices to the total
-          price += (evIncreaseSmallPrice * evSmallAmount);
-        }
-      }
-
-      // Get the IVs from the set
-      const ivs = set.ivs;
-
-      // Loop over the ivs
-      for (const stat in ivs) {
-        // Get the ev number for the stat
-        const value = ivs[stat];
-
-        // Value less than 31
-        if (value < 31) {
-          // If stat is less than 15, and has
-          // an iv-zeroing item associated
-          if (value < 15 && stat in ivMin) {
-
-            // Get the iv-min item required
-            const ivMinItem = ivMin[stat];
-
-            // Add the iv-min item to the list
-            items[ivMinItem] = 1;
-            price += berryPrice;
-
-            // Non-zero ivs
-            if (value > 0) {
-              // Add the iv increasing item required
-              const ivIncreaseItem = ivIncrease[stat];
-              items[ivIncreaseItem] = value;
-
-              // Add item prices to the total
-              price += (value * berryPrice);
-            }
-          }
-          else // Value over 15/stat not in iv min
-          {
-            // Get the number of items required
-            const ivReduce = 31 - value;
-
-            // At least one item required
-            if (ivReduce > 0) {
-              // Get the iv-reducing item required
-              const ivReduceItem = ivDecrease[stat];
-              items[ivReduceItem] = ivReduce;
-
-              // Add item prices to the total
-              price += (ivReduce * berryPrice);
-            }
-          }
-        }
-      }
-
       // Create the item table, increment set number
-      createItemTable(set, setNo++, items, price);
+      createItemTable(set, setNo++, items);
     }
   }
 } 

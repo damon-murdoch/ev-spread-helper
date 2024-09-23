@@ -4,9 +4,10 @@ const colsPerRow = 4
 
 // Item Constants
 
-const evModifierBig = 28
-
-const evIncreaseBigPrice = 500
+const evModifierBig = {
+  'main': 10,
+  'ebr': 28
+}
 
 const evIncreaseBig = {
   "hp": "Health Mochi / HP Up",
@@ -17,11 +18,12 @@ const evIncreaseBig = {
   "spe": "Swift Mochi / Carbos",
 }
 
-const evModifierSmall = 4
+const evModifierSmall = {
+  'main': 1,
+  'ebr': 4
+}
 
-const evIncreaseSmallPrice = 75
-
-const evIncreaseSmall = { 
+const evIncreaseSmall = {
   "hp": "Health Feather",
   "atk": "Muscle Feather",
   "def": "Resist Feather",
@@ -61,8 +63,6 @@ const ivMin = {
   "atk": "Durin Berry",
   "spe": "Belue Berry"
 }
-
-const berryPrice = 150;
 
 const natureMint = {
   "adamant": "Adamant Mint",
