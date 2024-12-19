@@ -1,8 +1,17 @@
 // General Constants
 
-const colsPerRow = 4
+const colsPerRow = 2
 
 // Item Constants
+
+const statHeaders = {
+  "hp": "HP",
+  "atk": "Attack",
+  "def": "Defense",
+  "spa": "Sp.Atk",
+  "spd": "Sp.Def",
+  "spe": "Speed"
+}
 
 const evModifierBig = {
   'main': 10,
@@ -91,3 +100,73 @@ const natureMint = {
   "serious": "Serious Mint",
   "timid": "Timid Mint"
 };
+
+// Taken from: https://www.polygon.com/pokemon-sword-shield-guide/2019/11/26/20984044/how-to-ev-train-vitamins-macho-brace-poke-jobs
+
+// PokeJob EVs
+const pokeJobEvs = [
+  336, 192, 168,
+  112, 96, 96,
+  64, 56, 42,
+  32, 32, 28,
+  24, 16, 16,
+  14, 12, 8,
+  8, 4
+]
+
+const pokeJobs = [
+  "Whole day (24 hours) [pi]", "Whole day (24 hours) + Macho Brace", 
+  "Half day (12 hours) [pi]", "Very long (8 hours) [pi]", 
+  "Whole day (24 hours)", "Half day (12 hours) + Macho Brace", 
+  "Very long (8 hours) + Macho Brace", "Long (4 hours) [pi]", 
+  "Short (3 hours) [pi]", "Very short (2 hours) [pi]", 
+  "Half day (12 hours)", "Long (4 hours) + Macho Brace", 
+  "Short (3 hours) + Macho Brace", "Very long (8 hours)", 
+  "Very short (2 hours) + Macho Brace", "A little while (1 hour) [pi]", 
+  "Short (3 hours)", "Very short (2 hours)", 
+  "A little while (1 hour) + Macho Brace", "A little while (1 hour)"
+];
+
+const powerItems = {
+  "hp": "Power Weight",
+  "atk": "Power Bracer",
+  "def": "Power Lens",
+  "spa": "Power Belt",
+  "spd": "Power Band",
+  "spe": "Power Anklet",
+};
+
+const evMons = {
+  "bss": {
+    "hp": "Skwovet",
+    "atk": "Chewtle",
+    "def": "Rolycoly",
+    "spa": "Gastly",
+    "spd": "Gossifleur",
+    "spe": "Rookidee",
+  },
+  "bsv": {
+    "hp": "Azurill",
+    "atk": "Shinx / Yungoos",
+    "def": "Scatterbug / Tarountula",
+    "spa": "Psyduck / Mareep",
+    "spd": "Spoink",
+    "spe": "Fletchling / Rookidee",
+  }
+}
+
+const usePkrs = {
+  "main": false,
+  "ebr": false,
+  "bsv": true,
+  "bss": true,
+  "jobs": true
+}
+
+const useItems = {
+  "main": false,
+  "ebr": false,
+  "bsv": true,
+  "bss": true,
+  "jobs": true
+}

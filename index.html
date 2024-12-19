@@ -81,14 +81,31 @@
                 </tr>
                 <tr>
                   <th>
-                    <select class='form-control' id="game">
-                      <option id="main" value="main" selected>
-                        Main Series Games (Gen 8-9)
-                      </option>
-                      <option id="ebr" value="ebr">
-                        Emerald Battle Revolution
-                      </option>
-                    </select>
+                    <div class="input-group">
+                      <select class="form-control" id="game" onchange="init(this.value)">
+                        <option id="main" value="main">
+                          Using Items (Main Series Games, Gen 8-9)
+                        </option>
+                        <option id="ebr" value="ebr">
+                          Using Items (Emerald Battle Revolution)
+                        </option>
+                        <option id="bsv" value="bsv">
+                          Using Battles (Pokemon Scarlet & Violet)
+                        </option>
+                        <option id="bss" value="bss">
+                          Using Battles (Pokemon Sword & Shield)
+                        </option>
+                        <option id="jobs" value="jobs">
+                          Using Jobs (Pokemon Sword & Shield)
+                        </option>
+                      </select>
+                      <div class="input-group-append">
+                        <div class="input-group-text">
+                          <input type="checkbox" id="pokerus" />
+                          <img class="ml-2 mb-0" src="img/pokerus.png" alt="Pokerus" style="max-height: 24px;" />
+                        </div>
+                      </div>
+                    </div>                    
                   </th>
                 </tr>
               </thead>

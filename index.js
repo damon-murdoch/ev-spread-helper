@@ -15,11 +15,10 @@ function parseShowdownExport() {
 
 // Create Item Table
 function createItemTable(set, setNo, items) {
-
   // Dereference Species
-  const species = set["species"]
+  const species = set["species"];
 
-  console.log(`Generating table ${setNo} (${species}) ...`)
+  console.log(`Generating table ${setNo} (${species}) ...`);
 
   // Clear instructions div
   const parent = document.getElementById('instructions');
@@ -57,6 +56,7 @@ function createItemTable(set, setNo, items) {
   while (i < keys.length) {
     // Create the table row
     const row = document.createElement('tr');
+
     // Create 'colsPerRow' columns per row
     for (let j = i + colsPerRow; i < j; i++) {
       // Create the table column
@@ -64,26 +64,59 @@ function createItemTable(set, setNo, items) {
 
       // Index is in range
       if (i < keys.length) {
-
-        // Get the item name
+        // Get the item name and quantity
         const item = keys[i];
+        let quantity = items[item];
 
-        // Add item, amount to column
-        col.innerHTML = `${item} x${items[item]}`;
-      }
-      else // Index not in range
-      {
+        // Create the input group container
+        const inputGroup = document.createElement('div');
+        inputGroup.classList.add('input-group'); // Bootstrap input group
+
+        // Create the readonly input field for the item name
+        const input = document.createElement('input');
+        input.classList.add('form-control');
+        input.type = 'text';
+        input.value = `${quantity}x ${item}`;
+        input.readOnly = true; // Make the input readonly
+        input.classList.add('me-2'); // Add margin to the right of the label
+
+        // Create the decrement button with quantity
+        const button = document.createElement('button');
+        button.style = 'width: 10%';
+        button.textContent = `${quantity}`;
+        button.classList.add('btn', 'btn-secondary', 'btn-sm');
+
+        // On click, decrement the value and update button text
+        button.onclick = function () {
+          if (quantity > 0) {
+            quantity -= 1; // Decrease the quantity
+            button.textContent = `${quantity}`; // Update the button text to reflect the new quantity
+          }
+
+          // Disable button and change text color to gray when quantity reaches 0
+          if (quantity === 0) {
+            button.disabled = true;
+          }
+        };
+
+        // Append the input field and button to the input group
+        inputGroup.appendChild(input);
+        inputGroup.appendChild(button);
+
+        // Add the input group to the column
+        col.appendChild(inputGroup);
+      } else {
         // Empty column
         col.innerHTML = `-`;
       }
+
       // Add column to the row
       row.appendChild(col);
     }
+
     // Add the row to the body
     tableBody.appendChild(row);
   }
-
-  // ...
 
   // Add table body to table
   newTable.appendChild(tableBody);
@@ -92,7 +125,98 @@ function createItemTable(set, setNo, items) {
   parent.appendChild(newTable);
 }
 
+function get_stat_evs(value, modifiers, pokerus = false) {
+  const results = [];
+  let remainder = value;
+
+  for (const modifier of modifiers) {
+    const adjusted = pokerus ? modifier * 2 : modifier;
+    const amount = (remainder / adjusted) | 0;
+    results.push(amount);
+
+    remainder %= adjusted;
+  }
+
+  return results;
+}
+
+function get_ev_jobs(evs, items, pokerus = false) {
+
+  // Loop over the evs
+  for (const stat in evs) {
+    // Get the ev number for the stat
+    const value = evs[stat];
+
+    const stat_evs = get_stat_evs(value, pokeJobEvs, pokerus);
+
+    // Loop over the indexes
+    for (const index in stat_evs) {
+      if (stat_evs[index] > 0) {
+
+        // Generate basic string
+        let evJob = `${statHeaders[stat]} Job - ${pokeJobs[index]}`;
+
+        // Replace power item placeholder
+        if (evJob.includes('[pi]')) {
+          evJob = evJob.replace('[pi]', ` + ${powerItems[stat]}`);
+        }
+
+        // Add action to the list
+        items[evJob] = stat_evs[index];
+      }
+    }
+  }
+
+  return items;
+}
+
+function get_ev_battles(evs, game, items, pokerus = false) {
+
+  // EV Modifier
+  const modifier = [9, 2, 1];
+
+  // Loop over the evs
+  for (const stat in evs) {
+    // Get the ev number for the stat
+    const value = evs[stat];
+
+    const stat_evs = get_stat_evs(value, modifier, pokerus);
+
+    // Any 'big' items required
+    if (stat_evs[0] > 0) {
+      // Get the name of the item required
+      const evBigItem = `${evMons[game][stat]} + ${powerItems[stat]}`;
+
+      // Add the item, quantity to the list
+      items[evBigItem] = stat_evs[0];
+    }
+
+    // Any 'mid' items required
+    if (stat_evs[1] > 0) {
+      // Get the name of the item required
+      const evMidItem = `${evMons[game][stat]} + Macho Brace`;
+
+      // Add the item, quantity to the list
+      items[evMidItem] = stat_evs[1];
+    }
+
+    // Any 'small' items required
+    if (stat_evs[2] > 0) {
+      // Get the name of the item required
+      const evSmallItem = `${evMons[game][stat]}`
+
+      // Add the item, quantity to the list
+      items[evSmallItem] = stat_evs[2];
+    }
+  }
+
+  return items;
+}
+
 function get_ev_items(evs, game, items) {
+
+  // Create the per-game modifier array
+  const modifiers = [evModifierBig[game], evModifierSmall[game]];
 
   // Loop over the evs
   for (const stat in evs) {
@@ -100,32 +224,24 @@ function get_ev_items(evs, game, items) {
     // Get the ev number for the stat
     const value = evs[stat];
 
-    // Get the remainder after applying 'n' big modifiers
-    const evSmall = value % (evModifierBig[game]);
-
-    // Get the clean number of 'big' modifiers
-    const evBig = value - evSmall;
-
-    // Get the number of modifiers required
-    const evBigAmount = evBig / (evModifierBig[game]);
-    const evSmallAmount = evSmall / (evModifierSmall[game]);
+    const stat_evs = get_stat_evs(value, modifiers, false);
 
     // Any 'big' items required
-    if (evBigAmount > 0) {
+    if (stat_evs[0] > 0) {
       // Get the name of the item required
       const evBigItem = evIncreaseBig[stat];
 
       // Add the item, quantity to the list
-      items[evBigItem] = evBigAmount;
+      items[evBigItem] = stat_evs[0];
     }
 
     // Any 'small' items required
-    if (evSmallAmount > 0) {
+    if (stat_evs[1] > 0) {
       // Get the name of the item required
       const evSmallItem = evIncreaseSmall[stat];
 
       // Add the item, quantity to the list
-      items[evSmallItem] = evSmallAmount;
+      items[evSmallItem] = stat_evs[1];
     }
   }
 
@@ -177,15 +293,33 @@ function get_iv_items(ivs, items) {
   return items
 }
 
-// Instructions Generator
-function generate() {
+function init(game) {
+  // Enable or disable Pokerus
+  const pokerus = document.getElementById('pokerus');
+
+  // Game does not support pokerus
+  if (usePkrs[game] === false) {
+    // Clear and disable cb
+    pokerus.disabled = true;
+    pokerus.checked = false;
+  } else {
+    // Enable the checkbox
+    pokerus.disabled = false;
+  }
 
   // Clear instructions div
   const parent = document.getElementById('instructions');
   parent.innerHTML = "";
+}
+
+// Instructions Generator
+function generate() {
 
   // Get the game to generate instructions for
   const game = document.getElementById('game').value;
+
+  // Reset instructions
+  init(game);
 
   // Parse the showdown set export
   const sets = parseShowdownExport();
@@ -208,41 +342,66 @@ function generate() {
         "Fresh Start Mochi (Optional)": 1
       }
 
-      // Game-Specific
-      switch (game) {
-        // Main Series
-        case 'main': {
-          // Add Bottle Caps
-          items["Bottle Caps / Gold Bottle Cap (Optional)"] = 1;
-        }; break;
-
-        // Emerald Battle Revolution
-        case 'ebr': {
-          // Add Bottle Cap
-          items["Bottle Cap (Optional)"] = 1;
-
-          // Get the iv items for the game, set
-          items = get_iv_items(set.ivs, items);
-        }; break;
-      }
-
-      // Get the ev items for the game, set
-      items = get_ev_items(set.evs, game, items);
-
       // Get the nature from the set
       const nature = set.nature.toLowerCase();
 
-      // Nature is in list of valid natures
+      // Nature is valid
       if (nature in natureMint) {
-        // Get the nature mint string
-        const natureItemName = natureMint[nature]
+        // Add the mint to the items (Optional)
+        items[`${natureMint[nature]} (Optional)`] = 1;
+      }
 
-        // Add the mint to the items
-        items[natureItemName] = 1;
+      // Tera Type provided
+      const teraType = set.other["tera type"];
+      console.log(teraType);
+      if (teraType) {
+        // Add tera shards to the items (Optional, SV Only)
+        items[`${teraType} Tera Shards (Optional, SV Only)`] = 50;
+      }
+
+      // Get the pokerus value from the checkbox
+      const pokerus = document.getElementById('pokerus').checked;
+
+      switch (game) {
+        // Sword & Shield Battles
+        case 'bss':
+        // Scarlet & Violet Battles
+        case 'bsv':
+          items = get_ev_battles(set.evs, game, items, pokerus);
+          break;
+        // Sword & Shield Jobs
+        case 'jobs': {
+          items = get_ev_jobs(set.evs, items, pokerus);
+        }; break;
+        default: {
+          // Game-Specific
+          switch (game) {
+            // Main Series
+            case 'main': {
+              // Add Bottle Caps
+              items["Bottle Caps / Gold Bottle Cap (Optional)"] = 1;
+            }; break;
+
+            // Emerald Battle Revolution
+            case 'ebr': {
+              // Add Bottle Cap
+              items["Bottle Cap (Optional)"] = 1;
+
+              // Get the iv items for the game, set
+              items = get_iv_items(set.ivs, items);
+            }; break;
+          }
+
+          // Get the ev items for the game, set
+          items = get_ev_items(set.evs, game, items);
+        }; break;
       }
 
       // Create the item table, increment set number
       createItemTable(set, setNo++, items);
     }
   }
-} 
+}
+
+// Load Main
+init('main');
